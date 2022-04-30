@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const port = process.env.PORT || 5000;
 require('dotenv').config();
+const port = process.env.PORT || 5000;
+
 const app = express();
 
 app.use(cors());
@@ -31,26 +32,34 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const fruits = await AllFruitsCollection.findOne(query);
             res.send(fruits);
-        })
+        });
+
+        app.put('/allFruits/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateQuantity = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: updateQuantity.quantity
+                }
+            };
+
+            const result = await AllFruitsCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
     }
     finally { }
 }
 run().catch(console.dir);
 
 
-
-
-
-
-
-
-
-
 app.get('/', (req, res) => {
-    res.send('books warehouse is running');
+    res.send('fruits warehouse is running');
 
 })
 
 app.listen(port, () => {
-    console.log('books warehouse is running');
+    console.log('fruits warehouse is running');
 })
