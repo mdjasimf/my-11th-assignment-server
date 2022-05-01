@@ -54,6 +54,11 @@ async function run() {
             const result = await AllFruitsCollection.deleteOne(query);
             res.send(result);
         })
+        app.post('/allFruits', async (req, res) => {
+            const newAdd = req.body;
+            const result = await AllFruitsCollection.insertOne(newAdd);
+            res.send(result);
+        })
 
     }
     finally { }
