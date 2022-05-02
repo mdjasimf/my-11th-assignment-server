@@ -68,6 +68,12 @@ async function run() {
             const result = await AllFruitsCollection.deleteOne(query);
             res.send(result);
         })
+        app.delete('/myItems/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await AllFruitsCollection.deleteOne(query);
+            res.send(result);
+        })
         app.post('/allFruits', async (req, res) => {
             const newAdd = req.body;
             const result = await AllFruitsCollection.insertOne(newAdd);
