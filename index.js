@@ -27,6 +27,20 @@ async function run() {
             res.send(fruits);
 
         });
+
+
+
+        app.get('/myItems', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = AllFruitsCollection.find(query);
+            const fruits = await cursor.toArray();
+            res.send(fruits);
+
+        });
+
+
+
         app.get('/allFruits/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
