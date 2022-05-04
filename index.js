@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
@@ -11,7 +12,26 @@ app.use(express.json());
 
 
 
-const uri = `mongodb+srv://FRUITS:YIJprcW3zmldSMJZ@cluster0.qgwct.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+
+function verifyjwt(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' });
+    }
+    const toke = authHeader.split(' ')[1]
+    jwt.verify(toke, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden' });
+        }
+        console.log('decode', decoded);
+        req.decoded = decoded;
+    })
+    next();
+}
+
+
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.qgwct.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
@@ -28,14 +48,26 @@ async function run() {
 
         });
 
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            })
+            res.send({ accessToken });
+        })
 
-
-        app.get('/myItems', async (req, res) => {
+        app.get('/myItems', verifyjwt, async (req, res) => {
+            const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            const query = { email: email };
-            const cursor = AllFruitsCollection.find(query);
-            const fruits = await cursor.toArray();
-            res.send(fruits);
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const cursor = AllFruitsCollection.find(query);
+                const fruits = await cursor.toArray();
+                res.send(fruits);
+            }
+            else {
+                return res.status(403).send({ message: 'forbidden' });
+            }
 
         });
 
