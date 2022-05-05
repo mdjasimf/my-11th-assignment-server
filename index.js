@@ -40,6 +40,7 @@ async function run() {
 
         await client.connect();
         const AllFruitsCollection = client.db('fruitswarehouse').collection('fruits');
+        const BestDeliverFruits = client.db('bestDeliver').collection('fruits');
         app.get('/allFruits', async (req, res) => {
             const query = {};
             const cursor = AllFruitsCollection.find(query);
@@ -111,6 +112,18 @@ async function run() {
             const result = await AllFruitsCollection.insertOne(newAdd);
             res.send(result);
         })
+        app.post('/bestDeliverFruits', async (req, res) => {
+            const newAdd = req.body;
+            const result = await BestDeliverFruits.insertOne(newAdd);
+            res.send(result);
+        })
+        app.get('/bestDeliverFruits', async (req, res) => {
+            const query = {};
+            const cursor = BestDeliverFruits.find(query);
+            const fruits = await cursor.toArray();
+            res.send(fruits);
+
+        });
 
     }
     finally { }
