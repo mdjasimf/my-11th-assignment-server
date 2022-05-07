@@ -131,6 +131,10 @@ app.get('/', (req, res) => {
     res.send('fruits warehouse is running');
 
 })
+app.get('/new', (req, res) => {
+    res.send('fruits warehouse is running');
+
+})
 
 app.listen(port, () => {
     console.log('fruits warehouse is running');
