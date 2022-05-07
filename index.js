@@ -13,20 +13,21 @@ app.use(express.json());
 
 
 
-function verifyjwt(req, res, next) {
+function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         return res.status(401).send({ message: 'unauthorized access' });
     }
-    const toke = authHeader.split(' ')[1]
-    jwt.verify(toke, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    const token = authHeader.split(' ')[1];
+    console.log(token)
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
             return res.status(403).send({ message: 'forbidden' });
         }
-        console.log('decode', decoded);
         req.decoded = decoded;
+        next();
     })
-    next();
+
 }
 
 
@@ -57,18 +58,13 @@ async function run() {
             res.send({ accessToken });
         })
 
-        app.get('/myItems', verifyjwt, async (req, res) => {
-            const decodedEmail = req.decoded.email;
+        app.get('/myItems', verifyJWT, async (req, res) => {
             const email = req.query.email;
-            if (email === decodedEmail) {
-                const query = { email: email };
-                const cursor = AllFruitsCollection.find(query);
-                const fruits = await cursor.toArray();
-                res.send(fruits);
-            }
-            else {
-                return res.status(403).send({ message: 'forbidden' });
-            }
+            const query = { email: email };
+            const cursor = AllFruitsCollection.find(query);
+            const fruits = await cursor.toArray();
+            res.send(fruits);
+
 
         });
 
